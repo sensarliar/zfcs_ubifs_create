@@ -1,0 +1,4 @@
+建议 ：
+1,用sd卡中的filesystem制作ubi文件系统。
+2,用uboot 命令行烧写nandflash
+3,对nandflash的烧写，需要重新在板子上焊接电阻 ，配置启动顺序 。

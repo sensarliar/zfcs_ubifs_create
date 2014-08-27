@@ -1,0 +1,93 @@
+
+
+./mkfs.ubifs -r .././arago_fs_nogit/ -F -o ubifs.img -m 2048 -e 126976 -c 800
+
+./ubinize -o ubi.img -m 2048 -p 128KiB -s 512 -O 2048 ubinize.cfg
+
+
+
+
+
+
+
+From information on how to create a UBIFS image. refer create an UBIFS image
+
+    mkfs.ubifs
+
+ [root@localhost]# cd /home/<user>/mtd/install/sbin
+ [root@localhost]# ./mkfs.ubifs -r <target_fs> -F -o ubifs.img -m 2048 -e 126976 -c 1580
+
+
+
+Where:
+
+-m 2KiB (or 2048)
+The minimum I/O size of the underlying UBI and MTD devices. In our case, we are running the flash with no sub-page writes, so this is a 2KiB page.
+-e 124KiB (or 126976)
+Erase Block Size: UBI requires 2 minimum I/O units out of each Physical Erase Block (PEB) for overhead: 1 for maintaining erase count information, and 1 for maintaining the Volume ID information. The PEB size for the XO flash is 128KiB, so this leads to each Logical Erase Block (LEB) having 124KiB available for data.
+-c 1580
+The maximum size, in LEBs, of this file system. See calculation below for how this number is determined.
+-r filesystem
+Use the contents of the 'filesystem/' directory to generate the initial file system image.
+
+-F
+
+File-system free space has to be fixed up on first mount (http://www.linux-mtd.infradead.org/faq/ubifs.html#L_free_space_fixup)
+-o ubifs.img
+Output file. 
+
+The output of the above command, ubifs.img is fed into the 'ubinize' program to wrap it into a UBI image.
+
+  The images produced by mkfs.ubifs must be further fed to the ubinize tool to create a UBI image which must be put to the raw flash to be used a UBI partition. 
+
+
+    Create ubinize.cfg file and write the contents into it
+
+ 
+ [root@localhost]# cd /home/<user>/mtd/install/sbin
+ [root@localhost]# vi ubinize.cfg
+
+  [ubifs]               <== Section header
+  mode=ubi              <== Volume mode (other option is static)
+  image=ubifs.img       <== Source image
+  vol_id=0              <== Volume ID in UBI image
+  vol_size=192MiB       <== Volume size
+  vol_type=dynamic      <== Allow for dynamic resize
+  vol_name=rootfs       <== Volume name
+  vol_flags=autoresize  <== Autoresize volume at first mount
+
+[See calculations below to determine the value associated with 'vol_size']
+
+    ubinize
+
+ 
+ [root@localhost]# cd /home/<user>/mtd/install/sbin
+ [root@localhost]# ./ubinize -o ubi.img -m 2048 -p 128KiB -s 512 -O 2048 ubinize.cfg
+
+Where:
+-o ubi.img
+Output file
+-m 2KiB (or 2048)
+Minimum flash I/O size of 2KiB page
+-p 128KiB
+
+Size of the physical eraseblock of the flash this UBI image is created for
+
+-O 2048 offset if the VID header from start of the physical eraseblock
+
+The output of the above command, 'ubi.img' is the required image.
+
+
+
+
+
+
+Some comments about what the options mean:
+
+    -r root-fs: tells mkfs.ubifs to create an UBIFS image which would have identical contents as the local root-fs directory;
+    -m 2048: tells mkfs.ubifs that the minimum input/output unit size of the flash this UBIFS image is created for is 2048 bytes (NAND page in this case);
+    -e 129024: logical eraseblock size of the UBI volume this image is created for;
+    -c 2047: specifies maximum file-system size in logical eraseblocks; this means that it will be possible to use the resulting file-system on volumes up to this size (less or equivalent); so in this particular case, the resulting FS may be put on volumes up to about 251MiB (129024 multiplied by 2047); See this section for more details.
+    -p 128KiB: tells ubinize that physical eraseblock size of the flash chip the UBI image is created for is 128KiB (128 * 1024 bytes);
+    -s 512: tells ubinize that the flash supports sub-pages and sub-page size is 512 bytes; ubinize will take this into account and put the VID header to the same NAND page as the EC header.
+
