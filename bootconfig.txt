@@ -1,5 +1,17 @@
 建议 ：
 1,用sd卡中的filesystem制作ubi文件系统。
+   用cp命令的方式拷贝arago文件系统；这样就ok，文件系统可以工作。启动时间为40s。
+log记录为/home/gaoming/log/test_fs/gm_ubi_t3.txt
 2,用uboot 命令行烧写nandflash
 3,对nandflash的烧写，需要重新在板子上焊接电阻 ，配置启动顺序 。
  把R66拆至R91;把R67拆至R92;boot3,boot4
+从配置为11100   sd卡启动
+改为00100,	启动顺序为MMC0->NAND
+
+
+
+附录：
+ 1)如果要加速可以用nand为第一启动顺序的配置；
+nandflash最先启动可用的为 10010;10011;10100;
+sd卡最先启动的为10111;
+ 2)关掉网口启动。
