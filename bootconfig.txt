@@ -1,6 +1,9 @@
 建议 ：
 1,用sd卡中的filesystem制作ubi文件系统。
    用cp命令的方式拷贝arago文件系统；这样就ok，文件系统可以工作。启动时间为40s。
+ cp /home/gaoming/ti-sdk-am335x-evm-06.00.00.00/filesystem/arago-base-tisdk-image-am335x-evm/* /home/gaoming/ti-sdk-am335x-evm-06.00.00.00/filesystem/arago_fs_nogit -R
+
+
 log记录为/home/gaoming/log/test_fs/gm_ubi_t3.txt
 2,用uboot 命令行烧写nandflash
 3,对nandflash的烧写，需要重新在板子上焊接电阻 ，配置启动顺序 。
