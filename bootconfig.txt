@@ -17,4 +17,5 @@ log记录为/home/gaoming/log/test_fs/gm_ubi_t3.txt
  1)如果要加速可以用nand为第一启动顺序的配置；
 nandflash最先启动可用的为 10010;10011;10100;
 sd卡最先启动的为10111;
+相应的操作应该是R91拆至R66
  2)关掉网口启动。
